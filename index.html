@@ -14,9 +14,13 @@
 	</head>
 
 	<body>
-		<input type="textfield" id="searchString"/> <button onclick="search()">Suchen</button>
+		<script type="module" src="./visjs_se.js"></script>
+		<input type="textfield" id="searchString"/> <button id="searchButton">Suchen</button>
+		<script type="module">
+  			import {search} from './visjs_se.js'
+  			document.querySelector('#searchButton').addEventListener('click', search)
+		</script>
 		<p id="demo"></p>
 		<div id="mynetwork"></div>
-		<script type="module" src="./visjs_se.js"></script>
 	</body>
 </html>

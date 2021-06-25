@@ -857,7 +857,6 @@ var nodesComplete = new vis.DataSet([
         { from: 9, to: 43 },
         { from: 9, to: 44 },
         { from: 9, to: 45 },
-
 	{ from: 32, to: 47 },
 	{ from: 32, to: 15 },
 	{ from: 32, to: 56 },

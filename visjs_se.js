@@ -1,13 +1,19 @@
 //import graph data sets
+
 import {
 	nodesComplete,
 	edgesComplete
 } from './data.js';
 
+export {
+	search
+};
+
 //data set of initially visible nodes
-var nodes = new vis.DataSet([
-	{id: 9, label: "root"}
-]);
+var nodes = new vis.DataSet([{
+	id: 9,
+	label: "root"
+}]);
 
 //data set of initially visible edges
 var edges = new vis.DataSet([]);
@@ -38,6 +44,18 @@ var options = {
 			avoidOverlap: 0,
 			damping: 1
 		},
+/*
+		forceAtlas2Based: {
+			theta: 0.1,
+			gravitationalConstant: -5000,
+			centralGravity: 0.05,
+			springLength: 50,
+			springConstant: 0.5,
+			avoidOverlap: 0,
+			damping: 1
+		},
+*/
+
 		hierarchicalRepulsion: {
 			nodeDistance: 400,
 			centralGravity: 0.5,
@@ -71,7 +89,7 @@ var options = {
 
 	nodes: {
 		shapeProperties: {
-			interpolation: false 
+			interpolation: false
 		}
 	}
 };
@@ -85,10 +103,10 @@ network.on("click", function(properties) {
 
 
 /**
-* function for collapse/expand clickEvents on node elements
-* 
-* @param {node} node Node-element that fired the click event
-**/
+ * function for collapse/expand clickEvents on node elements
+ * 
+ * @param {node} node Node-element that fired the click event
+ **/
 
 function clickEvent(node) {
 	var connectedEdgesList = edges.get({
@@ -98,10 +116,8 @@ function clickEvent(node) {
 	});
 
 	if (connectedEdgesList.length > 0) {
-		console.log("collapse");
 		collapse(node, false);
 	} else {
-		console.log("expand");
 		expand(node);
 	}
 }
@@ -109,27 +125,44 @@ function clickEvent(node) {
 function search() {
 	var searchString = document.getElementById("searchString").value;
 
-	var nodeList = nodes.get({
+	var nodeList = nodesComplete.getIds({
 		filter: function(item) {
-			return (item.label == searchString);
+			if (item.label == searchString) {
+				recursiveDiscovery(item.id);
+				return true;
+			}
 		}
 	});
 
-	for (const node of nodeList) {
-		console.log(node);
-		network.selectNodes([node.id]);
-		network.focus(node.id);
-		network.moveTo({
-			scale: 0.5
-		});
+	network.selectNodes(nodeList);
+	network.focus(nodeList[0]);
+	network.moveTo({
+		scale: 0.5
+	});
+}
+
+function recursiveDiscovery(node) {
+	try {
+		nodes.add(nodesComplete.get(node));
+
+		for (const e of edgesComplete.get()) {
+			if (e.to == node) {
+				console.info(e.from);
+				recursiveDiscovery(e.from);
+			}
+		}
+	} catch (ex) {
+		console.log("Node already exists");
+	} finally {
+		expand(node);
 	}
 }
 
 /**
-* "expands" a specific node by determining (edge-)connected nodes and adding the nodes and edges to the visible nodes and edges datasets
-*
-* @param {node} node The node-element to be expanded
-**/
+ * "expands" a specific node by determining (edge-)connected nodes and adding the nodes and edges to the visible nodes and edges datasets
+ *
+ * @param {node} node The node-element to be expanded
+ **/
 function expand(node) {
 	for (const e of edgesComplete.get()) {
 		if (e.from == node) {
@@ -139,16 +172,20 @@ function expand(node) {
 				console.info("Node already exists");
 			}
 
-			edges.add(e);
+			try {
+				edges.add(e);
+			} catch (ex) {
+				console.info("Edge already exists");
+			}
 		}
 	}
 }
 
 /**
-* "collapses" a specific node by determining (edge-)connected nodes and removing the nodes and edges from the visible nodes and edges datasets
-*
-* @param {node} node The node-element to be collapsed
-**/
+ * "collapses" a specific node by determining (edge-)connected nodes and removing the nodes and edges from the visible nodes and edges datasets
+ *
+ * @param {node} node The node-element to be collapsed
+ **/
 
 function collapse(node, hideNode) {
 	var connectedEdgesList = edges.get({
