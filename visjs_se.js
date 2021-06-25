@@ -29,12 +29,15 @@ var data = {
 var options = {
 	physics: {
 		enabled: true,
+		minVelocity: 15.0,
+
 		stabilization: {
 			enabled: true,
 			iterations: 1000,
 			fit: true
 		},
 		solver: 'forceAtlas2Based',
+		/*
 		forceAtlas2Based: {
 			theta: 0.1,
 			gravitationalConstant: -1000,
@@ -44,7 +47,7 @@ var options = {
 			avoidOverlap: 0,
 			damping: 1
 		},
-/*
+	
 		forceAtlas2Based: {
 			theta: 0.1,
 			gravitationalConstant: -5000,
@@ -54,7 +57,17 @@ var options = {
 			avoidOverlap: 0,
 			damping: 1
 		},
-*/
+		*/
+
+		forceAtlas2Based: {
+			theta: 0.1,
+			gravitationalConstant: -1500,
+			centralGravity: 0.05,
+			springLength: 15,
+			springConstant: 0.1,
+			avoidOverlap: 0.0,
+			damping: 1.0
+		},
 
 		hierarchicalRepulsion: {
 			nodeDistance: 400,
@@ -135,10 +148,14 @@ function search() {
 	});
 
 	network.selectNodes(nodeList);
-	network.focus(nodeList[0]);
-	network.moveTo({
-		scale: 0.25
+	network.once('stabilized', function(params) {
+		network.focus(nodeList[0]);
 	});
+
+	network.moveTo({
+		scale: 0.4
+	});
+
 }
 
 function recursiveDiscovery(node) {
@@ -187,23 +204,26 @@ function expand(node) {
  * @param {node} node The node-element to be collapsed
  **/
 
-function collapse(node, hideNode) {
-	var connectedEdgesList = edges.get({
+function collapse(node) {
+	var outgoingEdgesList = edges.get({
 		filter: function(item) {
 			return (item.from == node);
 		}
 	});
 
-	if (hideNode) {
-		var currentNode = nodes.get(node);
-		nodes.remove(node);
-	}
+	for (const e of outgoingEdgesList) {
+		var incomingEdgesList = edges.get({
+			filter: function(item) {
+				return (item.to == e.to);
+			}
+		});
 
-	for (const e of connectedEdgesList) {
-		if (e.from != e.to) {
-			collapse(e.to, true);
+		console.log(e.from + " " + e.to + " " + incomingEdgesList.length);
+		if (e.from != e.to && incomingEdgesList.length < 2) {
+			collapse(e.to);
 			nodes.remove(e.to);
-			edges.remove(e);
 		}
+
+		edges.remove(e);
 	}
 }
