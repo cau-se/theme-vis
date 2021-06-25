@@ -137,7 +137,7 @@ function search() {
 	network.selectNodes(nodeList);
 	network.focus(nodeList[0]);
 	network.moveTo({
-		scale: 0.5
+		scale: 0.25
 	});
 }
 
