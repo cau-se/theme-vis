@@ -9,10 +9,13 @@ export {
 	search
 };
 
+var searchNodeId = 0;
+
 //data set of initially visible nodes
 var nodes = new vis.DataSet([{
 	id: 9,
-	label: "root"
+	label: "root",
+	physics: false
 }]);
 
 //data set of initially visible edges
@@ -27,6 +30,10 @@ var data = {
 
 //some layout options
 var options = {
+	autoResize: true,
+	height: '100%',
+	width: '100%',
+	locale: 'en',
 	physics: {
 		enabled: true,
 		minVelocity: 15.0,
@@ -103,6 +110,12 @@ var options = {
 	nodes: {
 		shapeProperties: {
 			interpolation: false
+		},
+		color: {
+			highlight: {
+				border: '#3e7de5',
+				background: '#d4e5fd'
+			}
 		}
 	}
 };
@@ -111,9 +124,14 @@ var network = new vis.Network(container, data, options);
 
 network.on("click", function(properties) {
 	var node = properties.nodes[0];
-	clickEvent(node, false);
+	clickEvent(node);
 });
 
+
+network.on("deselectNode", function(properties) {
+	var node = properties.nodes[0];
+	deselectNodeEvent(node);
+});
 
 /**
  * function for collapse/expand clickEvents on node elements
@@ -129,11 +147,40 @@ function clickEvent(node) {
 	});
 
 	if (connectedEdgesList.length > 0) {
-		collapse(node, false);
+		collapse(node);
 	} else {
 		expand(node);
 	}
 }
+
+/**
+ * function for the delectNode event listener. Makes sure that red painted nodes from a search result go back to normal when another node is being selected.
+ *
+ *
+ * @param {node} node Node-element that fired the click event
+ **/
+
+function deselectNodeEvent(node) {
+	if (searchNodeId != 0) {
+		nodes.update({
+			id: searchNodeId,
+			color: {
+				highlight: {
+					// hardcoded colors, ugly!
+					border: '#3e7de5',
+					background: '#d4e5fd'
+				}
+			}
+		});
+		searchNodeId = 0;
+	}
+}
+
+
+/** 
+ * searches for a specific string in the node labels given by the search text field and highlights all results
+ *
+ **/
 
 function search() {
 	var searchString = document.getElementById("searchString").value;
@@ -142,6 +189,13 @@ function search() {
 		filter: function(item) {
 			if (item.label == searchString) {
 				recursiveDiscovery(item.id);
+				searchNodeId = item.id;
+				nodes.update({
+					id: item.id,
+					color: {
+						highlight: "red"
+					}
+				});
 				return true;
 			}
 		}
@@ -158,13 +212,18 @@ function search() {
 
 }
 
+/** 
+ * backtraces from a specific node to the root element and expands all visited nodes
+ *
+ * @param {node} node 
+ **/
+
 function recursiveDiscovery(node) {
 	try {
 		nodes.add(nodesComplete.get(node));
 
 		for (const e of edgesComplete.get()) {
 			if (e.to == node) {
-				console.info(e.from);
 				recursiveDiscovery(e.from);
 			}
 		}
@@ -180,6 +239,7 @@ function recursiveDiscovery(node) {
  *
  * @param {node} node The node-element to be expanded
  **/
+
 function expand(node) {
 	for (const e of edgesComplete.get()) {
 		if (e.from == node) {
@@ -218,7 +278,6 @@ function collapse(node) {
 			}
 		});
 
-		console.log(e.from + " " + e.to + " " + incomingEdgesList.length);
 		if (e.from != e.to && incomingEdgesList.length < 2) {
 			collapse(e.to);
 			nodes.remove(e.to);

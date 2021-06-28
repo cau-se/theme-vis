@@ -1,5 +1,5 @@
 var nodesComplete = new vis.DataSet([
-	{ id : 9, label: "root"},
+	{ id : 9, label: "root", physics: false},
 	{ id: 10, label: "Backgrounds", shape: "box", color: { background: "lightblue", border: "black" } },
 	{ id: 11, label: "Build system", shape: "box", color: { background: "lightblue", border: "black" } },
 	{ id: 12, label: "Novel concepts", shape: "box", color: { background: "lightblue", border: "black" } },
