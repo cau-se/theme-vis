@@ -3,8 +3,8 @@
 This archive contains an interactive theme and cateogry map of the OceanDSL interviews (1)
 and theme descriptions (2).
 
-(1) 10.5281/zenodo.8184267
-(2) 10.5281/zenodo.8200523
+- (1) 10.5281/zenodo.8184267
+- (2) 10.5281/zenodo.8200523
 
 To run this you can either build the docker image or by installing the necessary files on a
 webserver.
