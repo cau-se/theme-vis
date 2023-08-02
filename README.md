@@ -31,9 +31,11 @@ for example: https://172.17.0.2/index.html
 ## Copy to Webserver
 
 In case you are running your own webserver just copy the files
+
 - data.js
 - index.html
 - visjs_se.js
+  
 to a directory reachable for your webserver and enter the correct URL to access
 the index.html file in the URL field of your browser.
 
